@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Editor - One Click Demo</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1020;
+        --surface: #141c31;
+        --surface-2: #1b2642;
+        --text: #ecf1ff;
+        --muted: #94a3c5;
+        --accent: #4f8cff;
+        --ok: #17c964;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: radial-gradient(circle at top right, #1a2a57 0%, var(--bg) 50%);
+        color: var(--text);
+      }
+
+      .app {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 20px 14px 28px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .title {
+        margin: 0;
+        font-size: clamp(20px, 4vw, 28px);
+      }
+
+      .pill {
+        font-size: 12px;
+        color: var(--muted);
+        border: 1px solid #2c3a61;
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 12px;
+      }
+
+      .card {
+        background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+        border: 1px solid #2b3860;
+        border-radius: 12px;
+        padding: 14px;
+        min-height: 140px;
+      }
+
+      .section-title {
+        margin: 0 0 10px;
+        font-size: 16px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        background: #273459;
+        color: var(--text);
+        padding: 9px 12px;
+        cursor: pointer;
+        transition: transform 120ms ease, background-color 120ms ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        background: #30416f;
+      }
+
+      button.primary {
+        background: var(--accent);
+      }
+
+      button.primary:hover {
+        background: #66a1ff;
+      }
+
+      button:disabled {
+        opacity: 0.55;
+        cursor: default;
+        transform: none;
+      }
+
+      .list {
+        margin: 8px 0 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 8px;
+      }
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #2a365c;
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: #15203a;
+      }
+
+      .templates {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 8px;
+      }
+
+      .template {
+        background: #15203a;
+        border: 1px solid #2b3860;
+        border-radius: 10px;
+        padding: 8px;
+        cursor: pointer;
+      }
+
+      .template.selected {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px #4f8cff66 inset;
+      }
+
+      .thumb {
+        height: 76px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #3b4f87, #223155 60%, #445f9f);
+        margin-bottom: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .thumb::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(110deg, transparent 10%, #ffffff22 45%, transparent 80%);
+        transform: translateX(-120%);
+        animation: shine 2.6s linear infinite;
+      }
+
+      @keyframes shine {
+        to {
+          transform: translateX(120%);
+        }
+      }
+
+      .progress-wrap {
+        margin-top: 10px;
+        border: 1px solid #2a365c;
+        border-radius: 999px;
+        overflow: hidden;
+        background: #0e1528;
+      }
+
+      .progress {
+        height: 10px;
+        width: 0%;
+        background: linear-gradient(90deg, #4f8cff, #71e4ff);
+        transition: width 180ms linear;
+      }
+
+      .preview-stage {
+        margin-top: 8px;
+        border: 1px solid #2b3860;
+        border-radius: 12px;
+        height: 190px;
+        background: #0d1428;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .preview-bg {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 25% 25%, #344e8f 0%, #0d1428 64%);
+      }
+
+      .scanline {
+        position: absolute;
+        left: -40%;
+        width: 40%;
+        top: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, #ffffff26, transparent);
+        animation: sweep 2.2s linear infinite;
+      }
+
+      @keyframes sweep {
+        to {
+          transform: translateX(360%);
+        }
+      }
+
+      .preview-caption {
+        position: absolute;
+        left: 10px;
+        bottom: 10px;
+        font-size: 13px;
+        color: #d9e5ff;
+        background: #00000059;
+        padding: 5px 8px;
+        border-radius: 6px;
+      }
+
+      .status {
+        margin-top: 10px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .ok {
+        color: var(--ok);
+      }
+
+      @media (max-width: 860px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <h1 class="title">Web One-Click Demo</h1>
+        <span class="pill">UI/UX Simulation Only</span>
+      </header>
+
+      <section class="grid">
+        <article class="card" aria-label="Home Module">
+          <h2 class="section-title">MODULE 1 - Home</h2>
+          <p class="muted">Create projects, browse recent items, and open templates.</p>
+          <div class="btn-row">
+            <button class="primary" id="newProjectBtn">New Project</button>
+            <button id="recentBtn">Recent</button>
+            <button id="templatesBtn">Templates</button>
+          </div>
+          <ul class="list" id="recentList"></ul>
+        </article>
+
+        <article class="card" aria-label="Upload Module">
+          <h2 class="section-title">MODULE 2 - Mock Upload + Fake Processing</h2>
+          <p class="muted">No real upload. Uses mocked files and simulated processing states.</p>
+          <div class="btn-row">
+            <button id="mockUploadBtn">Mock Video Upload</button>
+            <button id="startProcessBtn" class="primary" disabled>Start Fake Processing</button>
+          </div>
+          <div class="progress-wrap" aria-live="polite">
+            <div class="progress" id="progressBar"></div>
+          </div>
+          <p class="status" id="processStatus">Idle</p>
+        </article>
+      </section>
+
+      <section class="grid" style="margin-top: 12px">
+        <article class="card" aria-label="Template Module">
+          <h2 class="section-title">MODULE 3 - Template Preview (Visual Only)</h2>
+          <div class="templates" id="templateGrid"></div>
+          <p class="status" id="templateStatus">No template selected</p>
+        </article>
+
+        <article class="card" aria-label="Preview Module">
+          <h2 class="section-title">MODULE 5 - Preview Simulation</h2>
+          <div class="preview-stage">
+            <div class="preview-bg"></div>
+            <div class="scanline"></div>
+            <div class="preview-caption" id="previewCaption">Preview not started</div>
+          </div>
+          <div class="btn-row" style="margin-top: 10px">
+            <button id="previewBtn" class="primary" disabled>Run Preview Simulation</button>
+          </div>
+          <p class="status" id="previewStatus">Waiting for fake processing to complete.</p>
+        </article>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        const recentProjects = [
+          { name: "Gym Promo Reel", date: "2h ago" },
+          { name: "Cafe Highlights", date: "Yesterday" },
+          { name: "Travel Shorts", date: "3d ago" }
+        ];
+
+        const templates = [
+          { id: "fast-cuts", label: "Fast Cuts" },
+          { id: "cinematic", label: "Cinematic Mood" },
+          { id: "neon-energy", label: "Neon Energy" },
+          { id: "minimal-story", label: "Minimal Story" }
+        ];
+
+        const state = {
+          projectName: "",
+          mockUploaded: false,
+          processing: false,
+          processDone: false,
+          processProgress: 0,
+          selectedTemplate: "",
+          previewRunning: false
+        };
+
+        let processTimer = null;
+        let previewTimer = null;
+
+        const el = {
+          newProjectBtn: document.getElementById("newProjectBtn"),
+          recentBtn: document.getElementById("recentBtn"),
+          templatesBtn: document.getElementById("templatesBtn"),
+          recentList: document.getElementById("recentList"),
+          mockUploadBtn: document.getElementById("mockUploadBtn"),
+          startProcessBtn: document.getElementById("startProcessBtn"),
+          progressBar: document.getElementById("progressBar"),
+          processStatus: document.getElementById("processStatus"),
+          templateGrid: document.getElementById("templateGrid"),
+          templateStatus: document.getElementById("templateStatus"),
+          previewBtn: document.getElementById("previewBtn"),
+          previewStatus: document.getElementById("previewStatus"),
+          previewCaption: document.getElementById("previewCaption")
+        };
+
+        function renderRecent() {
+          el.recentList.innerHTML = recentProjects
+            .map(
+              (item) =>
+                '<li class="item"><span>' +
+                item.name +
+                '</span><span class="muted">' +
+                item.date +
+                "</span></li>"
+            )
+            .join("");
+        }
+
+        function renderTemplates() {
+          el.templateGrid.innerHTML = templates
+            .map((t) => {
+              const selected = state.selectedTemplate === t.id ? " selected" : "";
+              return (
+                '<button class="template' +
+                selected +
+                '" data-template-id="' +
+                t.id +
+                '">' +
+                '<div class="thumb"></div>' +
+                '<div>' +
+                t.label +
+                "</div>" +
+                "</button>"
+              );
+            })
+            .join("");
+        }
+
+        function syncUi() {
+          el.startProcessBtn.disabled = !state.mockUploaded || state.processing;
+          el.previewBtn.disabled = !state.processDone || state.previewRunning;
+          el.progressBar.style.width = state.processProgress + "%";
+
+          if (state.projectName) {
+            el.processStatus.textContent = "Project: " + state.projectName;
+          }
+        }
+
+        function setProcessStatus(text, isOk) {
+          el.processStatus.textContent = text;
+          el.processStatus.classList.toggle("ok", !!isOk);
+        }
+
+        function setPreviewStatus(text, isOk) {
+          el.previewStatus.textContent = text;
+          el.previewStatus.classList.toggle("ok", !!isOk);
+        }
+
+        function stopTimers() {
+          if (processTimer) {
+            clearInterval(processTimer);
+            processTimer = null;
+          }
+          if (previewTimer) {
+            clearInterval(previewTimer);
+            previewTimer = null;
+          }
+        }
+
+        el.newProjectBtn.addEventListener("click", function () {
+          state.projectName = "Project " + new Date().toLocaleTimeString();
+          state.mockUploaded = false;
+          state.processing = false;
+          state.processDone = false;
+          state.processProgress = 0;
+          state.previewRunning = false;
+          stopTimers();
+          el.previewCaption.textContent = "Preview reset";
+          setProcessStatus("New project created. Start with mock upload.", false);
+          setPreviewStatus("Waiting for fake processing to complete.", false);
+          syncUi();
+        });
+
+        el.recentBtn.addEventListener("click", function () {
+          renderRecent();
+          setProcessStatus("Showing static recent projects.", false);
+        });
+
+        el.templatesBtn.addEventListener("click", function () {
+          renderTemplates();
+          setProcessStatus("Template gallery opened.", false);
+        });
+
+        el.mockUploadBtn.addEventListener("click", function () {
+          state.mockUploaded = true;
+          state.processDone = false;
+          state.processProgress = 0;
+          setProcessStatus("Mock upload complete: 3 clips added.", true);
+          setPreviewStatus("Run fake processing before preview.", false);
+          syncUi();
+        });
+
+        el.startProcessBtn.addEventListener("click", function () {
+          if (state.processing) return;
+          state.processing = true;
+          state.processDone = false;
+          state.processProgress = 0;
+          setProcessStatus("Fake processing started...", false);
+          setPreviewStatus("Processing in progress...", false);
+          syncUi();
+
+          processTimer = setInterval(function () {
+            const step = 6 + Math.floor(Math.random() * 8);
+            state.processProgress = Math.min(100, state.processProgress + step);
+            el.progressBar.style.width = state.processProgress + "%";
+
+            if (state.processProgress >= 100) {
+              clearInterval(processTimer);
+              processTimer = null;
+              state.processing = false;
+              state.processDone = true;
+              setProcessStatus("Fake processing complete.", true);
+              setPreviewStatus("Ready for preview simulation.", true);
+              syncUi();
+            }
+          }, 170);
+        });
+
+        el.templateGrid.addEventListener("click", function (event) {
+          const target = event.target.closest("[data-template-id]");
+          if (!target) return;
+          state.selectedTemplate = target.getAttribute("data-template-id") || "";
+          renderTemplates();
+          const selected = templates.find((t) => t.id === state.selectedTemplate);
+          el.templateStatus.textContent = selected
+            ? "Selected: " + selected.label + " (visual preview only)"
+            : "No template selected";
+        });
+
+        el.previewBtn.addEventListener("click", function () {
+          if (state.previewRunning) return;
+          state.previewRunning = true;
+          let tick = 0;
+          setPreviewStatus("Preview simulation running...", false);
+          syncUi();
+
+          previewTimer = setInterval(function () {
+            tick += 1;
+            const templateName =
+              (templates.find((t) => t.id === state.selectedTemplate) || {}).label || "Default";
+            el.previewCaption.textContent =
+              "Simulated frame " + tick + " • Template: " + templateName;
+
+            if (tick >= 22) {
+              clearInterval(previewTimer);
+              previewTimer = null;
+              state.previewRunning = false;
+              setPreviewStatus("Preview simulation complete (no real render).", true);
+              syncUi();
+            }
+          }, 90);
+        });
+
+        renderRecent();
+        renderTemplates();
+        syncUi();
+      })();
+    </script>
+  </body>
+</html>
