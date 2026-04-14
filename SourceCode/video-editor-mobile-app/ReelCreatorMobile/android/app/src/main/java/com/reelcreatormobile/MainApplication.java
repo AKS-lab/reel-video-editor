@@ -12,7 +12,6 @@ import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import com.reactnativedocumentpicker.DocumentPickerPackage;
 import com.rnfs.RNFSPackage;
 import com.swmansion.gesturehandler.RNGestureHandlerPackage;
-import com.swmansion.rnscreens.RNScreensPackage;
 import com.th3rdwave.safeareacontext.SafeAreaContextPackage;
 import com.brentvatne.react.ReactVideoPackage;
 import java.util.Arrays;
@@ -35,7 +34,6 @@ public class MainApplication extends Application implements ReactApplication {
               new RNFSPackage(),
               new RNGestureHandlerPackage(),
               new SafeAreaContextPackage(),
-              new RNScreensPackage(),
               new ReactVideoPackage());
         }
 
