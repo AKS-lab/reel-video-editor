@@ -61,9 +61,15 @@ public class MainApplication extends Application implements ReactApplication {
   @Override
   public void onCreate() {
     super.onCreate();
-    SoLoader.init(this, false);
-    if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
-      DefaultNewArchitectureEntryPoint.load();
+    CrashFileLogger.install(this);
+    try {
+      SoLoader.init(this, false);
+      if (BuildConfig.IS_NEW_ARCHITECTURE_ENABLED) {
+        DefaultNewArchitectureEntryPoint.load();
+      }
+    } catch (Throwable startupError) {
+      CrashFileLogger.logThrowable(this, "APPLICATION_ON_CREATE", startupError);
+      throw startupError;
     }
   }
 }
